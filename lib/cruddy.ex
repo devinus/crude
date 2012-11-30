@@ -7,29 +7,23 @@ defmodule Evented do
     lc n inlist names, do: __defevent__(n)
   end
 
-  def __deftrigger__(event_name, callback_name) when is_atom(callback_name) do
+  def __deftrigger__(event_name, callback_name) do
     quote do
       def trigger(unquote(event_name), context) do
-        unquote(callback_name).(context)
+        unquote(__trigger__(callback_name))
       end
     end
   end
 
-  def __deftrigger__(event_name, callback_names) when is_list(callback_names) do
-    trigger = lc cb inlist callback_names do
-      quote do
-        unquote(cb).(context)
-      end
-    end
-
-    quote do
-      def trigger(unquote(event_name), context) do
-        unquote(trigger)
-      end
-    end
+  defp __trigger__(callback) when is_atom(callback) do
+    quote(do: unquote(callback).(context))
   end
 
-  def __defevent__(event_name) do
+  defp __trigger__(callbacks) when is_list(callbacks) do
+    List.foldl callbacks, [], fn cb, acc -> quote(do: unquote(cb).(unquote(acc))) end
+  end
+
+  defp __defevent__(event_name) do
     quote do
       defmacro unquote(event_name)(callback_name) do
         unquote(__MODULE__).__deftrigger__(unquote(event_name), callback_name)
@@ -47,8 +41,8 @@ defmodule Cruddy do
 
   defevent :on_create
   # defevent :on_read
-  # defevent on_update
-  # defevent on_delete
+  # defevent :on_update
+  # defevent :on_delete
 
   defmacro defcrudable(name, block) do
     quote do
@@ -97,19 +91,26 @@ defmodule Test do
   defcrudable Post do
     fields [:id, :title, :body]
 
-    on_create [:do_create, :tweet_about_it]
+    on_create [:do_create, :tweet_about_it, :now_do_something_crazy]
     # on_read :do_read
     # on_update :do_update
     # on_delete :do_delete
     #
     defp do_create(rec) do
-      IO.puts "Check it"
+      IO.puts "Created! Got: #{inspect rec}"
+      :created
     end
 
     defp tweet_about_it(rec) do
-      IO.puts "Tweeted!"
+      IO.puts "Tweeted! Got: #{inspect rec}"
+      :tweeted
     end
-    #
+
+    defp now_do_something_crazy(rec) do
+      IO.puts "Something crazy! Got: #{inspect rec}"
+      :something_crazy
+    end
+
     # defp do_read(rec) do
     # end
     #
