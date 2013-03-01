@@ -1,9 +1,9 @@
 Code.require_file "../test_helper.exs", __FILE__
 
-defmodule CruddyTest do
+defmodule CRUDETest do
   use ExUnit.Case
 
-  import Cruddy
+  import CRUDE
 
   defmodule Events do
     import Evented

@@ -16,12 +16,12 @@ defmodule Evented do
   end
 
   defp __trigger__(callback) when is_atom(callback) do
-    quote do: unquote(callback).(context)
+    quote do: unquote(callback)(context)
   end
 
   defp __trigger__(callbacks) when is_list(callbacks) do
     List.foldl callbacks, quote(do: context), fn cb, acc ->
-      quote do: unquote(cb).(unquote(acc))
+      quote do: unquote(cb)(unquote(acc))
     end
   end
 
@@ -34,7 +34,7 @@ defmodule Evented do
   end
 end
 
-defmodule Cruddy do
+defmodule CRUDE do
   import Evented
 
   defevent :on_create
@@ -54,7 +54,7 @@ defmodule Cruddy do
   defmacro defcrudable(name, block) do
     quote do
       defmodule unquote(name) do
-        import Cruddy
+        import CRUDE
 
         @primary_key :id
         @fields [:id]
@@ -65,22 +65,22 @@ defmodule Cruddy do
         alias __MODULE__, as: Rec
 
         def find(id) do
-          Rec.trigger(:on_read, id)
+          Rec.trigger :on_read, id
         end
 
         def exists?(rec) do
-          Rec.trigger(:on_exists?, rec[@primary_key])
+          Rec.trigger :on_exists?, rec[@primary_key]
         end
 
         def save(rec) do
           case Rec.trigger(:on_exists?, rec[@primary_key]) do
-            true -> rec.trigger(:on_update)
-            false -> rec.trigger(:on_create)
+            true -> rec.trigger :on_update
+            false -> rec.trigger :on_create
           end
         end
 
         def delete(rec) do
-          Rec.trigger(:on_delete, rec[@primary_key])
+          Rec.trigger :on_delete, rec[@primary_key]
         end
       end
     end

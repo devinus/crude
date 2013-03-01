@@ -2,7 +2,7 @@ defmodule Cruddy.Mixfile do
   use Mix.Project
 
   def project do
-    [ app: :cruddy,
+    [ app: :crude,
       version: "0.0.1",
       deps: deps ]
   end

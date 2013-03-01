@@ -1,4 +1,4 @@
-# Cruddy
+# CRUDE (Create, Read, Update, Delete, Exists)
 
 ```elixir
 defpersistable Post do
